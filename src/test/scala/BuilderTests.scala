@@ -72,6 +72,10 @@ class BuilderTests extends FunSpec with ShouldMatchers {
     it("should use None as the default value for unspecified Option fields") {
       new Builder[PotentiallyPriceless].build should equal(PotentiallyPriceless(None))
     }
+
+    it("should default to null for unspecified fields") {
+      new Builder[Wrapper].build should equal(Wrapper(null))
+    }
 	}
 }
 
@@ -96,3 +100,5 @@ case class VeryPreciseThing(value: Double)
 case class BitOfACharacter(character: Char)
 
 case class PotentiallyPriceless(price: Option[Double])
+
+case class Wrapper(wrappee: Any)

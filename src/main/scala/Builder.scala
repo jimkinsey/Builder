@@ -68,6 +68,7 @@ class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends D
       case "scala.Boolean" => false
       case "scala.Char" => ' '
       case "scala.Option" => None
+      case _ => null
     }
   }
 
