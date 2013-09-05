@@ -8,7 +8,12 @@ class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends D
 	import scala.language.dynamics
 
 	def build: T = {
-		val values = tFields.map(v => fields(v.name.decoded))		
+		val values = tFields.zipWithIndex map {
+      case (field, index) => fields.get(field.name.decoded) match {
+        case Some(value) => value
+        case _ => defaultValue(field, index)
+			}
+		}		
 		tConstructor(values:_*).asInstanceOf[T]
 	}
 	
@@ -28,16 +33,30 @@ class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends D
 	
 	private lazy val tClass = tType.typeSymbol.asClass
 	
-	private lazy val tFields = tType.declarations.sorted.filter { symbol => symbol match {
+	private lazy val tFields = tDeclarations.filter { symbol => symbol match {
 			case symbol: MethodSymbol => symbol.isParamAccessor
 			case _ => false
 		}
-	}
+	}.asInstanceOf[List[MethodSymbol]]
+	
+	private lazy val tDeclarations = tType.declarations.sorted
 		
 	private lazy val tConstructor = {
 		val mirror = universe.runtimeMirror(getClass.getClassLoader)
 		val reflectClass = mirror.reflectClass(tClass)
 		reflectClass.reflectConstructor(tType.declaration(nme.CONSTRUCTOR).asMethod)
 	}
+
+  private def defaultValue(field: MethodSymbol, fieldIndex: Int): Any = {
+    val defaultMethodName = "apply$default$%s" format fieldIndex + 1
+    val module = tClass.companionSymbol.asModule
+    val instanceMirror = currentMirror reflect (currentMirror reflectModule module).instance
+    val typeSignature = instanceMirror.symbol.typeSignature
+    val defaultMethodSymbol = typeSignature member newTermName(defaultMethodName)
+
+    // if (x != NoSymbol) {
+    (instanceMirror reflectMethod defaultMethodSymbol.asMethod)()
+    // }
+  }
 
 }
