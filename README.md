@@ -22,14 +22,14 @@ It is immutable, allowing the "fixing" of fields:
     val christmasJones = jonesBuilder.withFirstName("Christmas").build
 
 Why?
-====
+----
 
-#. I wanted to play around with the Scala reflection API
-#. Also, the Dynamic trait
-#. I've seen a lot of boiler-plate builder classes in my time
+* I wanted to play around with the Scala reflection API
+* Also, the Dynamic trait
+* I've seen a lot of boiler-plate builder classes in my time
 
 Notes
-=====
+-----
 
 Currently only supports case classes. Will work with some other classes but behaviour is not guaranteed.
 
