@@ -47,16 +47,28 @@ class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends D
 		reflectClass.reflectConstructor(tType.declaration(nme.CONSTRUCTOR).asMethod)
 	}
 
-  private def defaultValue(field: MethodSymbol, fieldIndex: Int): Any = {
+  private def defaultValue(field: MethodSymbol, fieldIndex: Int) = {
     val defaultMethodName = "apply$default$%s" format fieldIndex + 1
     val module = tClass.companionSymbol.asModule
     val instanceMirror = currentMirror reflect (currentMirror reflectModule module).instance
     val typeSignature = instanceMirror.symbol.typeSignature
-    val defaultMethodSymbol = typeSignature member newTermName(defaultMethodName)
+    typeSignature member newTermName(defaultMethodName) match {
+      case NoSymbol => defaultValueForType(field.returnType)
+      case defaultMethodSymbol => (instanceMirror reflectMethod defaultMethodSymbol.asMethod)()
+    }
+  }
 
-    // if (x != NoSymbol) {
-    (instanceMirror reflectMethod defaultMethodSymbol.asMethod)()
-    // }
+  private def defaultValueForType(aType: Type) = {
+    aType.typeSymbol.fullName match {
+      case "java.lang.String" => ""
+      case "scala.Int" => 0
+      case "scala.Long" => 0L
+      case "scala.Float" => 0.0f
+      case "scala.Double" => 0.0
+      case "scala.Boolean" => false
+      case "scala.Char" => ' '
+      case "scala.Option" => None
+    }
   }
 
 }
