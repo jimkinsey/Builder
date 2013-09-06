@@ -39,43 +39,12 @@ class BuilderTests extends FunSpec with ShouldMatchers {
 			wesley should equal(HasFieldsWithDefaults("Wesley"))
 		}
 
-    it("should use an empty string as the default value for unspecified string fields") {
-      val builder = new Builder[HasFieldsWithDefaults]
-      val unnamed = builder.build
-      unnamed should equal(HasFieldsWithDefaults(name = ""))
+    it("should use the default function when an unspecified field has no default value") {
+      def defaultFn(typeName: String): Any = "A suitable default"
+      val defaultedName = new Builder[HasFieldsWithDefaults](defaultFn).build
+      defaultedName should equal(HasFieldsWithDefaults(name = "A suitable default"))
     }
 
-    it("should use 0 as the default value for unspecified integer fields") {
-       new Builder[HasAnAge].build should equal(HasAnAge(0))
-    }
-
-    it("should use 0 as the default value for unspecified long fields") {
-      new Builder[HasABigNumber].build should equal(HasABigNumber(0L))
-    }
-
-    it("should use 0.0 as the default value for unspecified float fields") {
-      new Builder[PreciseThing].build should equal(PreciseThing(0.0f))
-    }
-
-    it("should use 0.0 as the default value for unspecified double fields") {
-      new Builder[VeryPreciseThing].build should equal(VeryPreciseThing(0.0))
-    }
-
-    it("should use false as the default value for unspecified boolean fields") {
-       new Builder[MaybeAwesome].build should equal(MaybeAwesome(false))
-    }
-
-    it("should use a space as the default value for unspecified char fields") {
-      new Builder[BitOfACharacter].build should equal(BitOfACharacter(' '))
-    }
-
-    it("should use None as the default value for unspecified Option fields") {
-      new Builder[PotentiallyPriceless].build should equal(PotentiallyPriceless(None))
-    }
-
-    it("should default to null for unspecified fields") {
-      new Builder[Wrapper].build should equal(Wrapper(null))
-    }
 	}
 }
 
@@ -86,19 +55,3 @@ case class OneNameField(name: String)
 case class TwoNameFields(firstName: String, lastName: String)
 
 case class HasFieldsWithDefaults(name: String, alive: Boolean = true)
-
-case class HasAnAge(age: Int)
-
-case class MaybeAwesome(isAwesome: Boolean)
-
-case class HasABigNumber(aBigNumber: Long)
-
-case class PreciseThing(value: Float)
-
-case class VeryPreciseThing(value: Double)
-
-case class BitOfACharacter(character: Char)
-
-case class PotentiallyPriceless(price: Option[Double])
-
-case class Wrapper(wrappee: Any)

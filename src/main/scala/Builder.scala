@@ -3,7 +3,10 @@ package com.github.jimkinsey.builder
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime._
 
-class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends Dynamic {
+class Builder[T: TypeTag](
+  val default: (String) => Any = Defaults.degenerate,
+  private val fields: Map[String,Any] = Map()
+) extends Dynamic {
 
 	import scala.language.dynamics
 
@@ -18,7 +21,7 @@ class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends D
 	}
 	
 	def applyDynamic(name: String)(args: Any*) = name match {
-		case WithOrAnd(_, field) => new Builder[T](fields + (decapitalise(field) -> args(0)))
+		case WithOrAnd(_, field) => new Builder[T](default, fields + (decapitalise(field) -> args(0)))
 	}
 	
 	private def decapitalise(str: String) = str match {
@@ -53,22 +56,8 @@ class Builder[T: TypeTag](private val fields: Map[String,Any] = Map()) extends D
     val instanceMirror = currentMirror reflect (currentMirror reflectModule module).instance
     val typeSignature = instanceMirror.symbol.typeSignature
     typeSignature member newTermName(defaultMethodName) match {
-      case NoSymbol => defaultValueForType(field.returnType)
+      case NoSymbol => default(field.returnType.typeSymbol.fullName)
       case defaultMethodSymbol => (instanceMirror reflectMethod defaultMethodSymbol.asMethod)()
-    }
-  }
-
-  private def defaultValueForType(aType: Type) = {
-    aType.typeSymbol.fullName match {
-      case "java.lang.String" => ""
-      case "scala.Int" => 0
-      case "scala.Long" => 0L
-      case "scala.Float" => 0.0f
-      case "scala.Double" => 0.0
-      case "scala.Boolean" => false
-      case "scala.Char" => ' '
-      case "scala.Option" => None
-      case _ => null
     }
   }
 
