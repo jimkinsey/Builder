@@ -21,9 +21,13 @@ class Builder[T: TypeTag](
 	}
 	
 	def applyDynamic(name: String)(args: Any*) = name match {
-		case WithOrAnd(_, field) => new Builder[T](default, fields + (decapitalise(field) -> args(0)))
+		case WithOrAnd(_, field) => copyWithField(field, args(0))
 	}
-	
+
+  private def copyWithField(fieldName: String, value: Any) = {
+    new Builder[T](default, fields + (decapitalise(fieldName) -> value))
+  }
+
 	private def decapitalise(str: String) = str match {
 		case str if str.length > 1 => str(0).toString.toLowerCase + str.substring(1)
 		case str if str.length == 1 => str.toLowerCase
