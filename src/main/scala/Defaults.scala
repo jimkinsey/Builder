@@ -1,8 +1,10 @@
 package com.github.jimkinsey.builder
 
+import scala.reflect.runtime.universe._
+
 object Defaults {
 
-  val degenerate = Map[String, Any](
+  val defaults: Map[String, Any] = Map[String, Any](
     "java.lang.String" -> "",
     "scala.Int" -> 0,
     "scala.Long" -> 0L,
@@ -14,7 +16,11 @@ object Defaults {
     "scala.collection.immutable.List" -> List(),
     "scala.collection.immutable.Set" -> Set(),
     "scala.collection.immutable.Map" -> Map(),
-    "scala.collection.immutable.Seq" -> Seq()
+    "scala.collection.Seq" -> Seq()
   )
+
+  def degenerate(typeRef: Type): Option[Any] = {
+    defaults.get(typeRef.typeSymbol.fullName)
+  }
 
 }

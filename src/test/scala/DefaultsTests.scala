@@ -1,58 +1,61 @@
-import com.github.jimkinsey.builder.{Builder, Defaults}
+import com.github.jimkinsey.builder.Defaults
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.mock.MockitoSugar
+import scala.reflect.runtime.universe._
 
-class DefaultsTests  extends FunSpec with ShouldMatchers {
+class DefaultsTests  extends FunSpec with ShouldMatchers with MockitoSugar {
 
   describe("The degenerate default") {
 
     it("should be an empty string for Strings") {
-      Defaults.degenerate("java.lang.String") should equal("")
+      Defaults.degenerate(typeOf[String]) should equal(Some(""))
     }
 
     it("should be 0 for integers") {
-      Defaults.degenerate("scala.Int") should equal(0)
+      Defaults.degenerate(typeOf[Int]) should equal(Some(0))
     }
 
     it("should be 0 for longs") {
-      Defaults.degenerate("scala.Long") should equal(0L)
+      Defaults.degenerate(typeOf[Long]) should equal(Some(0L))
     }
 
     it("should be 0.0 for floats") {
-      Defaults.degenerate("scala.Float") should equal(0.0f)
+      Defaults.degenerate(typeOf[Float]) should equal(Some(0.0f))
     }
 
     it("should be 0.0 for doubles") {
-      Defaults.degenerate("scala.Double") should equal(0.0)
+      Defaults.degenerate(typeOf[Double]) should equal(Some(0.0))
     }
 
     it("should be false for booleans") {
-      Defaults.degenerate("scala.Boolean") should equal(false)
+      Defaults.degenerate(typeOf[Boolean]) should equal(Some(false))
     }
 
     it("should be a space for chars") {
-      Defaults.degenerate("scala.Char") should equal(' ')
+      Defaults.degenerate(typeOf[Char]) should equal(Some(' '))
     }
 
     it("should be None for Options") {
-      Defaults.degenerate("scala.Option") should equal(None)
+      Defaults.degenerate(typeOf[Option[_]]) should equal(Some(None))
     }
 
     it("should be an empty list for List") {
-      Defaults.degenerate("scala.collection.immutable.List") should equal(List())
+      Defaults.degenerate(typeOf[List[_]]) should equal(Some(List()))
     }
 
     it("should be an empty set for Set") {
-      Defaults.degenerate("scala.collection.immutable.Set") should equal(Set())
+      Defaults.degenerate(typeOf[Set[_]]) should equal(Some(Set()))
     }
 
     it("should be an empty map for Map") {
-      Defaults.degenerate("scala.collection.immutable.Map") should equal(Map())
+      Defaults.degenerate(typeOf[Map[_,_]]) should equal(Some(Map()))
     }
 
     it("should be an empty set for Seq") {
-      Defaults.degenerate("scala.collection.immutable.Seq") should equal(Seq())
+      Defaults.degenerate(typeOf[Seq[_]]) should equal(Some(Seq()))
     }
+
   }
 
 }

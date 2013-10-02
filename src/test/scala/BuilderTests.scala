@@ -39,11 +39,11 @@ class BuilderTests extends FunSpec with ShouldMatchers {
 			wesley should equal(HasFieldsWithDefaults("Wesley"))
 		}
 
-    it("should use the default function when an unspecified field has no default value") {
-      def defaultFn(typeName: String): Any = "A suitable default"
-      val defaultedName = new Builder[HasFieldsWithDefaults](defaultFn).build
-      defaultedName should equal(HasFieldsWithDefaults(name = "A suitable default"))
-    }
+	    it("should use the default function when an unspecified field has no default value") {
+	      def defaultFn(typeRef: Type): Any = "A suitable default"
+	      val defaultedName = new Builder[HasFieldsWithDefaults](defaultFn).build
+	      defaultedName should equal(HasFieldsWithDefaults(name = "A suitable default"))
+	    }
 
 	}
 }

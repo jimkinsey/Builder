@@ -4,17 +4,17 @@ import scala.reflect.runtime.universe._
 import scala.reflect.runtime._
 
 class Builder[T: TypeTag](
-  val default: (String) => Any = Defaults.degenerate,
-  private val fields: Map[String,Any] = Map()
+	val default: (Type) => Any = Defaults.degenerate,
+	private val fields: Map[String,Any] = Map()
 ) extends Dynamic {
 
 	import scala.language.dynamics
 
 	def build: T = {
 		val values = tFields.zipWithIndex map {
-      case (field, index) => fields.get(field.name.decoded) match {
-        case Some(value) => value
-        case _ => defaultValue(field, index)
+			case (field, index) => fields.get(field.name.decoded) match {
+				case Some(value) => value
+				case _ => defaultValue(field, index)
 			}
 		}		
 		tConstructor(values:_*).asInstanceOf[T]
@@ -24,9 +24,9 @@ class Builder[T: TypeTag](
 		case WithOrAnd(_, field) => copyWithField(field, args(0))
 	}
 
-  private def copyWithField(fieldName: String, value: Any) = {
-    new Builder[T](default, fields + (decapitalise(fieldName) -> value))
-  }
+	private def copyWithField(fieldName: String, value: Any) = {
+		new Builder[T](default, fields + (decapitalise(fieldName) -> value))
+	}
 
 	private def decapitalise(str: String) = str match {
 		case str if str.length > 1 => str(0).toString.toLowerCase + str.substring(1)
@@ -54,15 +54,22 @@ class Builder[T: TypeTag](
 		reflectClass.reflectConstructor(tType.declaration(nme.CONSTRUCTOR).asMethod)
 	}
 
-  private def defaultValue(field: MethodSymbol, fieldIndex: Int) = {
-    val defaultMethodName = "apply$default$%s" format fieldIndex + 1
-    val module = tClass.companionSymbol.asModule
-    val instanceMirror = currentMirror reflect (currentMirror reflectModule module).instance
-    val typeSignature = instanceMirror.symbol.typeSignature
-    typeSignature member newTermName(defaultMethodName) match {
-      case NoSymbol => default(field.returnType.typeSymbol.fullName)
-      case defaultMethodSymbol => (instanceMirror reflectMethod defaultMethodSymbol.asMethod)()
-    }
-  }
+	private lazy val tModule = tClass.companionSymbol.asModule
+
+	private lazy val tInstanceMirror = currentMirror reflect (currentMirror reflectModule tModule).instance
+
+	private def defaultValue(field: MethodSymbol, fieldIndex: Int) = {
+		fieldDefaultMethodSymbol(fieldIndex) match {
+			case NoSymbol => default(field.returnType)
+			case defaultMethodSymbol => (tInstanceMirror reflectMethod defaultMethodSymbol.asMethod)()
+		}
+	}
+
+	private def fieldDefaultMethodName(index: Int) =  "apply$default$%s" format index + 1
+
+	private def fieldDefaultMethodSymbol(index: Int) = {
+		val typeSignature = tInstanceMirror.symbol.typeSignature
+		typeSignature member newTermName(fieldDefaultMethodName(index))
+	}
 
 }
