@@ -57,7 +57,7 @@ class DefaultsTests extends FunSpec with ShouldMatchers with MockitoSugar {
       Defaults.degenerate(typeOf[Seq[_]]) should equal(Some(Seq()))
     }
 
-    it("should be a tuple of containing only null values for a Tuple") {
+    it("should be a Tuple containing the appropriate degenerate defaults for a Tuple (2 values)") {
       Defaults.degenerate(typeOf[(String, Int)]) should equal(Some(("", 0)))
     }
 
