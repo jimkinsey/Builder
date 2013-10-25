@@ -3,8 +3,9 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 import scala.reflect.runtime.universe._
+import org.scalatest.Tag
 
-class DefaultsTests  extends FunSpec with ShouldMatchers with MockitoSugar {
+class DefaultsTests extends FunSpec with ShouldMatchers with MockitoSugar {
 
   describe("The degenerate default") {
 
@@ -49,11 +50,15 @@ class DefaultsTests  extends FunSpec with ShouldMatchers with MockitoSugar {
     }
 
     it("should be an empty map for Map") {
-      Defaults.degenerate(typeOf[Map[_,_]]) should equal(Some(Map()))
+      Defaults.degenerate(typeOf[Map[_, _]]) should equal(Some(Map()))
     }
 
     it("should be an empty set for Seq") {
       Defaults.degenerate(typeOf[Seq[_]]) should equal(Some(Seq()))
+    }
+
+    it("should be a tuple of containing only null values for a Tuple") {
+      Defaults.degenerate(typeOf[(String, Int)]) should equal(Some(("", 0)))
     }
 
   }
