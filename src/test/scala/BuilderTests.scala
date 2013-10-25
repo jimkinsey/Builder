@@ -45,6 +45,16 @@ class BuilderTests extends FunSpec with ShouldMatchers {
       defaultedName should equal(HasFieldsWithDefaults(name = "A suitable default"))
     }
 
+    it("should handle classes with two parameter lists") {
+      val nameAndLanguages = new Builder[TwoParameterLists].withName("Charlotte").andLanguages(List("English", "French")).build
+      nameAndLanguages should equal(TwoParameterLists("Charlotte")(List("English", "French")))
+    }
+
+    it("should handle classes with three parameter lists") {
+      val nameAndLanguagesAndColour = new Builder[ThreeParameterLists].build
+      nameAndLanguagesAndColour should equal(ThreeParameterLists("")(List())(None))
+    }
+
 	}
 }
 
@@ -55,3 +65,7 @@ case class OneNameField(name: String)
 case class TwoNameFields(firstName: String, lastName: String)
 
 case class HasFieldsWithDefaults(name: String, alive: Boolean = true)
+
+case class TwoParameterLists(name: String)(languages: List[String])
+
+case class ThreeParameterLists(name: String)(languages: List[String])(favouriteColour: Option[String])

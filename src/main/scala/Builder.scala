@@ -40,14 +40,8 @@ class Builder[T: TypeTag](
 	
 	private lazy val tClass = tType.typeSymbol.asClass
 	
-	private lazy val tFields = tDeclarations.filter { symbol => symbol match {
-			case symbol: MethodSymbol => symbol.isParamAccessor
-			case _ => false
-		}
-	}.asInstanceOf[List[MethodSymbol]]
-	
-	private lazy val tDeclarations = tType.declarations.sorted
-		
+	private lazy val tFields = tConstructor.symbol.paramss.flatten.map(param => tType.declaration(param.name))
+
 	private lazy val tConstructor = {
 		val mirror = universe.runtimeMirror(getClass.getClassLoader)
 		val reflectClass = mirror.reflectClass(tClass)
@@ -58,11 +52,13 @@ class Builder[T: TypeTag](
 
 	private lazy val tInstanceMirror = currentMirror reflect (currentMirror reflectModule tModule).instance
 
-	private def defaultValue(field: MethodSymbol, fieldIndex: Int) = {
-		fieldDefaultMethodSymbol(fieldIndex) match {
-			case NoSymbol => default(field.returnType).get
-			case defaultMethodSymbol => (tInstanceMirror reflectMethod defaultMethodSymbol.asMethod)()
-		}
+	private def defaultValue(field: Symbol, fieldIndex: Int) = field match {
+    case field: MethodSymbol =>
+      fieldDefaultMethodSymbol(fieldIndex) match {
+        case NoSymbol => default(field.returnType).get
+        case defaultMethodSymbol => (tInstanceMirror reflectMethod defaultMethodSymbol.asMethod)()
+      }
+    case _ => null
 	}
 
 	private def fieldDefaultMethodName(index: Int) =  "apply$default$%s" format index + 1
