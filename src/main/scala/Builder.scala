@@ -4,7 +4,7 @@ import scala.reflect.runtime.universe._
 import scala.reflect.runtime._
 
 class Builder[T: TypeTag](
-	val default: (Type) => Any = Defaults.degenerate,
+	val default: (Type) => Option[Any] = Defaults.degenerate,
 	private val fields: Map[String,Any] = Map()
 ) extends Dynamic {
 
@@ -16,7 +16,7 @@ class Builder[T: TypeTag](
 				case Some(value) => value
 				case _ => defaultValue(field, index)
 			}
-		}		
+		}
 		tConstructor(values:_*).asInstanceOf[T]
 	}
 	
@@ -60,7 +60,7 @@ class Builder[T: TypeTag](
 
 	private def defaultValue(field: MethodSymbol, fieldIndex: Int) = {
 		fieldDefaultMethodSymbol(fieldIndex) match {
-			case NoSymbol => default(field.returnType)
+			case NoSymbol => default(field.returnType).get
 			case defaultMethodSymbol => (tInstanceMirror reflectMethod defaultMethodSymbol.asMethod)()
 		}
 	}
