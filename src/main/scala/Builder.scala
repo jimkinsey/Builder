@@ -33,8 +33,7 @@ class Builder[T: TypeTag](
   }
   
   private def decapitalise(str: String) = str match {
-    case str if str.length > 1 => str(0).toString.toLowerCase + str.substring(1)
-    case str if str.length == 1 => str.toLowerCase
+    case str if !str.isEmpty => str.head.toString.toLowerCase + str.tail
     case _ => str
   }
     
