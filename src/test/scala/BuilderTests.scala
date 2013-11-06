@@ -44,6 +44,12 @@ class BuilderTests extends FunSpec with ShouldMatchers {
       val defaultedName = new Builder[HasFieldsWithDefaults](defaultFn).build
       defaultedName should equal(HasFieldsWithDefaults(name = "A suitable default"))
     }
+    
+    it("should use null as the default value when the default function returns None") {
+      def defaultFn(typeRef: Type) = None
+      val defaultedName = new Builder[HasFieldsWithDefaults](defaultFn).build
+      defaultedName should be(HasFieldsWithDefaults(name = null))
+    }
 
     it("should handle classes with two parameter lists") {
       val nameAndLanguages = new Builder[TwoParameterLists].withName("Charlotte").andLanguages(List("English", "French")).build

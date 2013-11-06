@@ -61,6 +61,12 @@ class DefaultsTests extends FunSpec with ShouldMatchers with MockitoSugar {
       Defaults.degenerate(typeOf[(String, Int)]) should equal(Some(("", 0)))
     }
 
+    it("should be None for a type that has no obvious degenerate default") {
+      Defaults.degenerate(typeOf[UnknownBeforeNow]) should equal(None)
+    }
+
   }
 
 }
+
+class UnknownBeforeNow
