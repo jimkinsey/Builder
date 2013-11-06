@@ -21,12 +21,12 @@ class Builder[T: TypeTag](
   }
   
   def applyDynamic(name: String)(args: Any*) = name match {
-    case WithOrAndNo(_, field) if (args.isEmpty)=> copyWithField(field, default(fieldNamed(field).returnType).orNull)
-    case WithOrAnd(_, field) => copyWithField(field, args(0))
+    case WithOrAndNo(field) if (args.isEmpty)=> copyWithField(field, default(fieldNamed(field).returnType).orNull)
+    case WithOrAnd(field) => copyWithField(field, args(0))
   }
   
-  private lazy val WithOrAnd = """(with|and)([A-Za-z]+)""".r
-  private lazy val WithOrAndNo = """(with|and)No([A-Za-z]+)""".r
+  private lazy val WithOrAnd = """(?:with|and)([A-Za-z]+)""".r
+  private lazy val WithOrAndNo = """(?:with|and)No([A-Za-z]+)""".r
   
   private def copyWithField(fieldName: String, value: Any) = {
     new Builder[T](default, fields + (decapitalise(fieldName) -> value))
