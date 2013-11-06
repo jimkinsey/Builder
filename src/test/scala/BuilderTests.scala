@@ -7,37 +7,37 @@ import org.scalatest.Tag
 
 class BuilderTests extends FunSpec with ShouldMatchers {
 
-	describe("Invoking build") {
-	
-		it("should create an instance of the specified type") {
-			val noFieldsBuilder = new Builder[NoFields]
-			val builtNoFields = noFieldsBuilder.build
-			builtNoFields should equal(NoFields())
-		}	
-		
-		it("should set a field specified using the with prefix") {
-			val builderWithField = new Builder[OneNameField].withName("Inego")
-			val inego = builderWithField.build
-			inego should equal(OneNameField("Inego"))
-		}
-		
-		it("should set two fields specified using the with and and prefixes") {
-			val builderWithTwoFields = new Builder[TwoNameFields].withFirstName("Inego").andLastName("Montoya")
-			val inegoMontoya = builderWithTwoFields.build
-			inegoMontoya should equal(TwoNameFields("Inego", "Montoya"))
-		}
-		
-		it("should set two fields specified using the with and and prefixes regardless of order") {
-			val builderWithTwoFields = new Builder[TwoNameFields].withLastName("Montoya").andFirstName("Inego")
-			val inegoMontoya = builderWithTwoFields.build
-			inegoMontoya should equal(TwoNameFields("Inego", "Montoya"))
-		}
-		
-		it("should play nicely with fields with default values", Tag("defaults")) {
-			val builder = new Builder[HasFieldsWithDefaults].withName("Wesley")
-			val wesley = builder.build
-			wesley should equal(HasFieldsWithDefaults("Wesley"))
-		}
+  describe("Invoking build") {
+  
+    it("should create an instance of the specified type") {
+      val noFieldsBuilder = new Builder[NoFields]
+      val builtNoFields = noFieldsBuilder.build
+      builtNoFields should equal(NoFields())
+    }  
+    
+    it("should set a field specified using the with prefix") {
+      val builderWithField = new Builder[OneNameField].withName("Inego")
+      val inego = builderWithField.build
+      inego should equal(OneNameField("Inego"))
+    }
+    
+    it("should set two fields specified using the with and and prefixes") {
+      val builderWithTwoFields = new Builder[TwoNameFields].withFirstName("Inego").andLastName("Montoya")
+      val inegoMontoya = builderWithTwoFields.build
+      inegoMontoya should equal(TwoNameFields("Inego", "Montoya"))
+    }
+    
+    it("should set two fields specified using the with and and prefixes regardless of order") {
+      val builderWithTwoFields = new Builder[TwoNameFields].withLastName("Montoya").andFirstName("Inego")
+      val inegoMontoya = builderWithTwoFields.build
+      inegoMontoya should equal(TwoNameFields("Inego", "Montoya"))
+    }
+    
+    it("should play nicely with fields with default values", Tag("defaults")) {
+      val builder = new Builder[HasFieldsWithDefaults].withName("Wesley")
+      val wesley = builder.build
+      wesley should equal(HasFieldsWithDefaults("Wesley"))
+    }
 
     it("should use the default function when an unspecified field has no default value") {
       def defaultFn(typeRef: Type) = Some("A suitable default")
@@ -61,7 +61,19 @@ class BuilderTests extends FunSpec with ShouldMatchers {
       nameAndLanguagesAndColour should equal(ThreeParameterLists("")(List())(None))
     }
 
-	}
+    it("should use the degenerate default for a field specified explicitly as not being set") {
+      val hasNoName = new Builder[MaybeHasAName].withNoName().build
+      hasNoName.name should be(None)
+      val containsNothing = new Builder[ContainsThings].withNoThings().build
+      containsNothing.things should be(List())
+    }
+    
+    it("should allow fields which begin with 'no' to be set") {
+      val eccleston = new Builder[FieldBeginsWithNo].withNortherner(true).build
+      eccleston.northerner should be(true)
+    }
+
+  }
 }
 
 case class NoFields
@@ -75,3 +87,9 @@ case class HasFieldsWithDefaults(name: String, alive: Boolean = true)
 case class TwoParameterLists(name: String)(languages: List[String])
 
 case class ThreeParameterLists(name: String)(languages: List[String])(favouriteColour: Option[String])
+
+case class MaybeHasAName(name: Option[String])
+
+case class FieldBeginsWithNo(northerner: Boolean)
+
+case class ContainsThings(things: List[Any])
